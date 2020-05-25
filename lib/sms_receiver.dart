@@ -50,4 +50,9 @@ class SmsReceiver {
     bool result = await _channel.invokeMethod('stopListening');
     return result;
   }
+
+  Future<String> getAppSignature() async {
+    final String appSignature = await _channel.invokeMethod('getAppSignature');
+    return appSignature;
+  }
 }

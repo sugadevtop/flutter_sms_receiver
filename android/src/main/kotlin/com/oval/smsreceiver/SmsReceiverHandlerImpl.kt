@@ -49,6 +49,10 @@ class SmsReceiverHandlerImpl(private val context: Context,
                     }
                 }
             }
+            "getAppSignature" -> {
+                val appSignature = AppSignatureHelper(context).getAppSignatures().firstOrNull() ?: ""
+                result.success(appSignature)
+            }
             else -> {
                 result.notImplemented()
             }
