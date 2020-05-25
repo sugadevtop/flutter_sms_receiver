@@ -38,6 +38,17 @@ class SmsReceiverHandlerImpl(private val context: Context,
                     }
                 }
             }
+            "stopListening" -> {
+                synchronized(this) {
+                    if(!isListening) {
+                        Log.d(TAG, "SMS receiver already unregister")
+                        result.success(false)
+                    } else {
+                        stopListening()
+                        result.success(true)
+                    }
+                }
+            }
             else -> {
                 result.notImplemented()
             }
@@ -51,13 +62,11 @@ class SmsReceiverHandlerImpl(private val context: Context,
             val listener = object:SMSBroadcastReceiver.Listener {
                 override fun onSMSReceived(message: String) {
                     methodChannel.invokeMethod("onSmsReceived", message)
-                    context.unregisterReceiver(smsBroadcastReceiver)
-                    isListening = false
+                    stopListening()
                 }
                 override fun onTimeout() {
                     methodChannel.invokeMethod("onTimeout", null)
-                    context.unregisterReceiver(smsBroadcastReceiver)
-                    isListening = false
+                    stopListening()
                 }
             }
             smsBroadcastReceiver.injectListener(listener)
@@ -68,5 +77,10 @@ class SmsReceiverHandlerImpl(private val context: Context,
             methodChannel.invokeMethod("onFailureListener", null)
             isListening = false
         }
+    }
+
+    private fun stopListening() {
+        context.unregisterReceiver(smsBroadcastReceiver)
+        isListening = false
     }
 }
